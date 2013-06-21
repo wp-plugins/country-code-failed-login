@@ -271,8 +271,15 @@ function create_admin_page(){
     {
 
         // Check the local count
-        $LocalCountryCodeCount = get_option('pwh_country_code_failed_login_country_code_count', 0);
 
+        if( ! file_exists(plugin_dir_path( __FILE__ )."country_codes.inc"))
+        {
+           $LocalCountryCodeCount = 0;
+        }
+        else
+        { 
+            $LocalCountryCodeCount = get_option('pwh_country_code_failed_login_country_code_count', 0);
+        }
 
         // Check if there are new country codes on the remote server..
         // Pass in the local count. If there are more on the server it also fills an array with the country codes.
