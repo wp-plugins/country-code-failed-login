@@ -119,7 +119,7 @@ function create_admin_page(){
 	}
 
 	?>
-	IPs blocked by other sites in the network which tried to get to you!!!: <b>Total - <?php print $PreBlockTotal; ?></b><br>
+	IPs blocked by other sites in the network which tried to get to you!!! <b>Total: <?php print $PreBlockTotal; ?></b><br>
 	IPs blocked by other sites in the network which tried to get to you this month: <b><?php print $PreBlockMonth ; ?></b><p>
 
 
@@ -137,7 +137,7 @@ function create_admin_page(){
 	}
 
 	?>
-	IPs blocked by your site (give yourself a pat on the back!!): <b>Total - <?php print $BlockTotal; ?></b><br>
+	IPs blocked by your site (give yourself a pat on the back!!) <b>Total: <?php print $BlockTotal; ?></b><br>
 	IPs blocked by your site this month: <b><?php print $BlockMonth ; ?></b><p>
 
 	<?php
