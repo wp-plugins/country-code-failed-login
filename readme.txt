@@ -1,6 +1,6 @@
 === Country Code Failed Login ===
 Contributors: jsmcm
-Tags: brute force, login, failed login, spam, country ban, country block, attack, security, country code failed login
+Tags: brute force, login, failed login, country ban, country block, attack, security, country code failed login
 Requires at least: 3.5.1
 Tested up to: 3.5.1
 Stable tag: trunk
@@ -54,6 +54,12 @@ Wordpress Install (easiest)
 
 == Frequently Asked Questions ==
 
+= After installing this plugin my wp-login.php form crashed (500 server error or similar) =
+
+This may happen if your web hosting company has not configured their server to handle SOAP. The first thing you should do is ask them why! Then to access your login form go to your wp-login.php form and add the ccfl=off parameter, eg, http://yoursite.com/wp-login.php?ccfl=off
+If this seems confusing, please go to http://www.php-web-host.com/wordpress/country-code-failed-login/ccfl.php for more info and we'll help you get in!
+
+
 = We have users from multiple countries logging in, can we use this plugin? =
 
 If your blog allows registrations and logins from more than a single country, then no, this plugin will not be suitable as your users outside of your country may be blocked.
@@ -98,8 +104,14 @@ Nothing... The plugin won't log bad IPs and it won't block IPs either. Its essen
 * Added new stats in the settings screens. Blocked by you this month and Attacks against you blocked by the network this month
 * Added a check in check_ban routine to see if the request page was the wp-login.php form. If not it returns. This saves on external lookups to the PHP-Web-Host.com server 
 
+= 1.0.2 =
+* Added ccfl argument to wp-login.php?ccfl=off if your host is not correctly setup and the plugin causes your login form to crash.
+
 
 == Upgrade Notice ==
 
 = 1.0.1 =
 The test to see if the user is actually on the wp-login.php screen before doing remote ban lookups is important for page load speeds
+
+= 1.0.2 =
+Adds support if your host does not support SOAP and you're locked out of your own wp-login.php form
