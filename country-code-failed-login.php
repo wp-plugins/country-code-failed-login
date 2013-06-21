@@ -3,7 +3,7 @@
 Plugin Name: Country Code Failed Login
 Plugin URI: http://www.php-web-host.com/wordpress/plugins/country-code-failed-login-wordpress-plugin/
 Description: Log and block IP addresses after a single failed login attempt if they are from different country to you.
-Version: 1.0.2
+Version: 1.0.3
 Author: PHP-Web-Host.com
 Author URI: http://www.php-web-host.com
 License: GPL2
@@ -40,6 +40,27 @@ add_action('auth_cookie_bad_username', 'country_code_failed_login_check_for_ban'
 add_action('admin_notices', 'country_code_failed_login_notice');
 
 add_action('rightnow_end', 'country_code_failed_login_rightnow');
+
+register_shutdown_function('shutdownFunction');
+
+function shutdownFunction()
+{
+	
+    	$error = error_get_last();
+
+ 	if ( ($error['type'] == 1) && (strstr(strtolower($error['message']), 'soapclient') ) )
+	{
+        	//disable the plugin
+
+                require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+                deactivate_plugins("country-code-failed-login/country-code-failed-login.php");
+
+                print "<h1 style=\"color:red;\">ERROR!</h1>Your server does not appear to have SOAP installed. SOAP is required for Country Code Failed Login plugin to work, so its been disabled!<p>Please check with your web hosting provider why SOAP is not enabled.<p><a href=\"http://www.php-web-host.com\">PHP-Web-Host.com's servers are optimised for Wordpress</a><p><a href=\"wp-login.php\">Click here to try logging in again</a>";
+		exit();
+    	} 
+
+}
+
 
 function country_code_failed_login_menu() {
 
