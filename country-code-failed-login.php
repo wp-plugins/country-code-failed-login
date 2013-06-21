@@ -3,7 +3,7 @@
 Plugin Name: Country Code Failed Login
 Plugin URI: http://www.php-web-host.com/wordpress/plugins/country-code-failed-login-wordpress-plugin/
 Description: Log and block IP addresses after a single failed login attempt if they are from different country to you.
-Version: 1.0.3
+Version: 1.0.4
 Author: PHP-Web-Host.com
 Author URI: http://www.php-web-host.com
 License: GPL2
@@ -247,24 +247,59 @@ function create_admin_page(){
 	print 'Select the country you are in. This is the country you will usually be in when logging into your wordpress site.<p>If your country is not listed here, please mail support@php-web-host.com requesting that it be added.';
     }
 	
-    function create_country_code_dropdown(){
+
+    function recreate_country_codes_include_file($CountryCodesArrayString)
+    {
+         $CountryCodesArray = unserialize($CountryCodesArrayString);
+
+         $f = fopen(plugin_dir_path( __FILE__ )."country_codes.inc", "w");
+         
+         for($x = 0; $x < count($CountryCodesArray); $x++)
+         {
+              fwrite($f, "<option value=\"".strtolower($CountryCodesArray[$x]["code"])."\" <?php if(\$CurrentSetting == \"".strtolower($CountryCodesArray[$x]["code"])."\") print \" selected \"; ?>>".$CountryCodesArray[$x]["name"]." (".strtoupper($CountryCodesArray[$x]["code"]).")</option>\r\n");
+             
+         }
+
+         fclose($f);
+         
+         
+         update_option('pwh_country_code_failed_login_country_code_count', count($CountryCodesArray));
+
+    }
+
+    function create_country_code_dropdown()
+    {
+
+        // Check the local count
+        $LocalCountryCodeCount = get_option('pwh_country_code_failed_login_country_code_count', 0);
+
+
+        // Check if there are new country codes on the remote server..
+        // Pass in the local count. If there are more on the server it also fills an array with the country codes.
+	$options = array(
+	'uri' => 'https://www.php-web-host.com',
+	'location' => 'https://www.php-web-host.com/API/Country.php',
+	'trace' => 1);
+	
+	$client = new SoapClient(NULL, $options);
+
+	$CountryCodesArrayString = $client->GetCountryCodes($LocalCountryCodeCount);
+ 
+        if(strlen($CountryCodesArrayString ) > 0)
+        {
+            // the server sent us new codes, create the file
+            recreate_country_codes_include_file($CountryCodesArrayString);
+        }
+
 
 	$CurrentSetting = get_option('pwh_country_code_failed_login_country_code');
-	
-        ?>
-
-	
+	?>
 
         <select name="array_key[country_code]">
         <option value="-1">Make Selection</option>
-	<option value="us" <?php if($CurrentSetting == "au") print " selected "; ?>>Australia (AU)</option>
-	<option value="us" <?php if($CurrentSetting == "fr") print " selected "; ?>>France (FR)</option>
-	<option value="us" <?php if($CurrentSetting == "de") print " selected "; ?>>Germany (DE)</option>
-	<option value="gb" <?php if($CurrentSetting == "gb") print " selected "; ?>>Great Brittain (GB)</option>
-	<option value="us" <?php if($CurrentSetting == "ma") print " selected "; ?>>Morocco (MA)</option>
-	<option value="us" <?php if($CurrentSetting == "us") print " selected "; ?>>United States (US)</option>
-	<option value="za" <?php if($CurrentSetting == "za") print " selected "; ?>>South Africa (ZA)</option>
-        
+	<?php 
+        include(plugin_dir_path( __FILE__ )."country_codes.inc"); 
+        ?>
 	</select>
         <?php
     }
