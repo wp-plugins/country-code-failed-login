@@ -152,7 +152,7 @@ function create_admin_page(){
 	$Announcements = $client->Announcements(strtolower(get_option('pwh_country_code_failed_login_country_code')));
 
 	?>
-	IPs currently blocked in the entire network (<?php print strtolower(get_option('pwh_country_code_failed_login_country_code')); ?>): <b>Total - <?php print $TotalNetworkBlock ; ?></b>
+	IPs currently blocked in the entire network (<?php print strtolower(get_option('pwh_country_code_failed_login_country_code')); ?>) <b>Total:  <?php print $TotalNetworkBlock ; ?></b>
 
 
 	<?php
@@ -257,9 +257,14 @@ function create_admin_page(){
 
         <select name="array_key[country_code]">
         <option value="-1">Make Selection</option>
-        <option value="za" <?php if($CurrentSetting == "za") print " selected "; ?>>South Africa (ZA)</option>
-        <option value="us" <?php if($CurrentSetting == "us") print " selected "; ?>>United States (US)</option>
-        <option value="gb" <?php if($CurrentSetting == "gb") print " selected "; ?>>Great Brittain (GB)</option>
+	<option value="us" <?php if($CurrentSetting == "au") print " selected "; ?>>Australia (AU)</option>
+	<option value="us" <?php if($CurrentSetting == "fr") print " selected "; ?>>France (FR)</option>
+	<option value="us" <?php if($CurrentSetting == "de") print " selected "; ?>>Germany (DE)</option>
+	<option value="gb" <?php if($CurrentSetting == "gb") print " selected "; ?>>Great Brittain (GB)</option>
+	<option value="us" <?php if($CurrentSetting == "ma") print " selected "; ?>>Morocco (MA)</option>
+	<option value="us" <?php if($CurrentSetting == "us") print " selected "; ?>>United States (US)</option>
+	<option value="za" <?php if($CurrentSetting == "za") print " selected "; ?>>South Africa (ZA)</option>
+        
 	</select>
         <?php
     }

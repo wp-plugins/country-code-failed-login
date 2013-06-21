@@ -7,7 +7,7 @@ Stable tag: trunk
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Log and block IP addresses after a single failed login attempt if they are from different country to you.
+Log and block IP addresses after a single failed login attempt if they are from a different country to you.
 
 == Description ==
 
