@@ -110,14 +110,15 @@ Nothing... The plugin won't log bad IPs and it won't block IPs either. Its essen
 
 == Upgrade Notice ==
 
-= 1.0.1 =
-The test to see if the user is actually on the wp-login.php screen before doing remote ban lookups is important for page load speeds
-
-= 1.0.2 =
-Adds support if your host does not support SOAP and you're locked out of your own wp-login.php form
+= 1.0.4 =
+Added remote lookups of the list of country codes to use in the settings page. If a new country code(s) is added to the remote server, they are automatically updated locally.
 
 = 1.0.3 =
 Added the register_shutdown_function to check if a SOAP not found error has occured and automatically disables this plugin and display a useful message to the user. This version negates v1.0.2
 
-= 1.0.4 =
-Added remote lookups of the list of country codes to use in the settings page. If a new country code(s) is added to the remote server, they are automatically updated locally.
+= 1.0.2 =
+Adds support if your host does not support SOAP and you're locked out of your own wp-login.php form
+
+= 1.0.1 =
+The test to see if the user is actually on the wp-login.php screen before doing remote ban lookups is important for page load speeds
+
