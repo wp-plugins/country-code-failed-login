@@ -95,8 +95,14 @@ Nothing... The plugin won't log bad IPs and it won't block IPs either. Its essen
 
 == Changelog ==
 
-= 1.0.0 =
-* This is the first version :)
+= 1.0.4 =
+* Added remote lookups of the list of country codes to use in the settings page. If a new country code(s) is added to the remote server, they are automatically updated locally.
+
+= 1.0.3 =
+* Added the register_shutdown_function to check if a SOAP not found error has occured and automatically disables this plugin and display a useful message to the user. This version negates v1.0.2
+
+= 1.0.2 =
+* Added ccfl argument to wp-login.php?ccfl=off if your host is not correctly setup and the plugin causes your login form to crash.
 
 = 1.0.1 =
 * Added a message loader function to import announcements / news and update messages from the main server into the settings screen.
@@ -104,20 +110,12 @@ Nothing... The plugin won't log bad IPs and it won't block IPs either. Its essen
 * Added new stats in the settings screens. Blocked by you this month and Attacks against you blocked by the network this month
 * Added a check in check_ban routine to see if the request page was the wp-login.php form. If not it returns. This saves on external lookups to the PHP-Web-Host.com server 
 
-= 1.0.2 =
-* Added ccfl argument to wp-login.php?ccfl=off if your host is not correctly setup and the plugin causes your login form to crash.
+= 1.0.0 =
+* This is the first version :)
+
 
 
 == Upgrade Notice ==
-
-= 1.0.4 =
-Added remote lookups of the list of country codes to use in the settings page. If a new country code(s) is added to the remote server, they are automatically updated locally.
-
-= 1.0.3 =
-Added the register_shutdown_function to check if a SOAP not found error has occured and automatically disables this plugin and display a useful message to the user. This version negates v1.0.2
-
-= 1.0.2 =
-Adds support if your host does not support SOAP and you're locked out of your own wp-login.php form
 
 = 1.0.1 =
 The test to see if the user is actually on the wp-login.php screen before doing remote ban lookups is important for page load speeds
