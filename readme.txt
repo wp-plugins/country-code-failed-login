@@ -3,7 +3,7 @@ Contributors: jsmcm
 Tags: brute force, login, failed login, country ban, country block, attack, security, country code failed login
 Requires at least: 3.5.1
 Tested up to: 3.5.1
-Stable tag: trunk
+Stable tag: 1.0.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -94,6 +94,10 @@ Nothing... The plugin won't log bad IPs and it won't block IPs either. Its essen
 4. When logging in you can see a brief overview of attacks blocked in the Dashboard screen
 
 == Changelog ==
+
+= 1.0.5 =
+* All external links now use https
+* Added all country codes to an include file which is installed with the plugin so that remote lookups are not needed (negates v1.0.4)
 
 = 1.0.4 =
 * Added remote lookups of the list of country codes to use in the settings page. If a new country code(s) is added to the remote server, they are automatically updated locally.
