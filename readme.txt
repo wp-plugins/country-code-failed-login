@@ -2,8 +2,8 @@
 Contributors: jsmcm
 Tags: brute force, login, failed login, country ban, country block, attack, security, country code failed login
 Requires at least: 3.5.1
-Tested up to: 3.5.1
-Stable tag: 1.0.5
+Tested up to: 3.6.0
+Stable tag: 1.0.6
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -95,6 +95,9 @@ Nothing... The plugin won't log bad IPs and it won't block IPs either. Its essen
 
 == Changelog ==
 
+= 1.0.6 =
+* Added logging capabilities.
+
 = 1.0.5 =
 * All external links now use https
 * Added all country codes to an include file which is installed with the plugin so that remote lookups are not needed (negates v1.0.4)
@@ -120,6 +123,9 @@ Nothing... The plugin won't log bad IPs and it won't block IPs either. Its essen
 
 
 == Upgrade Notice ==
+
+= 1.0.6 =
+Added logging capability which allows the user to view run time logs, or click a link to automatically upload those logs to PHP-Web-Host.com's servers for inspection.
 
 = 1.0.1 =
 The test to see if the user is actually on the wp-login.php screen before doing remote ban lookups is important for page load speeds

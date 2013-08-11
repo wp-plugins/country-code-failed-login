@@ -3,7 +3,7 @@
 Plugin Name: Country Code Failed Login
 Plugin URI: https://www.php-web-host.com/wordpress/plugins/country-code-failed-login-wordpress-plugin/
 Description: Log and block IP addresses after a single failed login attempt if they are from different country to you.
-Version: 1.0.5
+Version: 1.0.6
 Author: PHP-Web-Host.com
 Author URI: https://www.php-web-host.com
 License: GPL2
@@ -43,6 +43,30 @@ add_action('rightnow_end', 'country_code_failed_login_rightnow');
 
 register_shutdown_function('shutdownFunction');
 
+
+function WriteLog($FunctionName, $Message)
+{
+	if( (isset($_SESSION["pwh_country_code_failed_login_debug_code"])) && 	(strlen($_SESSION["pwh_country_code_failed_login_debug_code"]) > 3) )
+	{
+		$DebugCode = $_SESSION["pwh_country_code_failed_login_debug_code"];
+	}
+	else
+	{
+		$DebugCode = rand(0, 9);
+		$DebugCode = $DebugCode.rand(0, 9);
+		$DebugCode = $DebugCode.rand(0, 9);
+		$DebugCode = $DebugCode.rand(0, 9);
+		$_SESSION["pwh_country_code_failed_login_debug_code"] = $DebugCode;
+	}
+
+	$DebugFile = plugin_dir_path( __FILE__ )."run.log";
+
+	$f = fopen($DebugFile, "a");
+	fwrite($f, date("Y-m-d H:i:s")." - [".$DebugCode."] - ".$FunctionName." - ".$Message."\r\n");
+	fclose($f);
+
+}
+
 function shutdownFunction()
 {
 	
@@ -51,6 +75,24 @@ function shutdownFunction()
  	if ( ($error['type'] == 1) && (strstr(strtolower($error['message']), 'soapclient') ) )
 	{
         	//disable the plugin
+
+		$DebugSetting = get_option('pwh_country_code_failed_login_debug_mode');
+	
+		if($DebugSetting == "on")
+		{
+			$PostMessage = "";
+			foreach($_POST as $key => $val)
+			{
+				$PostMessage = $PostMessage.$key." = ".$val.", ";
+			}
+
+			if(strlen($PostMessage) > 1)
+			{
+				$PostMessage = substr($PostMessage, 0, strlen($PostMessage) - 2);
+			}
+
+			WriteLog("shutdownFunction", "deactivating plugin. IP: ".$_SERVER["REMOTE_ADDR"]." - Error Type: ".$error["type"]." - Error Message: ".$error["message"]." - POSTS: ".$PostMessage);
+		}
 
                 require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
                 deactivate_plugins("country-code-failed-login/country-code-failed-login.php");
@@ -98,6 +140,12 @@ function create_admin_page(){
                     // This prints out all hidden setting fields
 		    settings_fields('pwh_country_code_failed_login_option_group');	
 		    do_settings_sections('pwh_country_code_failed_login-setting-admin');
+
+		    settings_fields('pwh_country_code_failed_login_option_group');	
+		    do_settings_sections('pwh_country_code_failed_login-setting-debug');
+
+		    print "<p><b>Disabling debug clears the log file</b></p>";
+
 		?>
 	        <?php submit_button(); ?>
 	    </form>
@@ -216,11 +264,47 @@ function create_admin_page(){
 	    'create_country_code_dropdown', 
 	    'pwh_country_code_failed_login-setting-admin',
 	    'setting_section_id'			
-	);		
+	);
+
+
+	
+        add_settings_section(
+	    'setting_section_id2',
+	    'Your debug setting',
+	    'print_debug_info',
+	    'pwh_country_code_failed_login-setting-debug'
+	);	
+		
+	add_settings_field(
+	    'some_id2', 
+	    'Enable Debug', 
+	    'create_country_code_debug_checkbox', 
+	    'pwh_country_code_failed_login-setting-debug',
+	    'setting_section_id2'			
+	);	
+
+	
+	
     }
 	
+
+
     	function check_ID($input)
 	{
+	
+	        $debug_mode = $input['debug_mode'];
+	        update_option('pwh_country_code_failed_login_debug_mode', $debug_mode);	
+
+                if($debug_mode != "on")
+		{
+			// clear the log file
+			unlink(plugin_dir_path( __FILE__ )."run.log");
+		}
+		else
+		{
+			WriteLog("LOGGING STARTED", "");
+		}
+
 	        $country_code = $input['country_code'];
 	        $SiteOwnerCountry = strtolower(get_option('pwh_country_code_failed_login_country_code'));
 	
@@ -246,6 +330,26 @@ function create_admin_page(){
     function print_section_info(){
 	print 'Select the country you are in. This is the country you will usually be in when logging into your wordpress site.<p>If your country is not listed here, please mail support@php-web-host.com requesting that it be added.';
     }
+
+
+    function print_debug_info(){
+
+	$LogLink = plugin_dir_url(plugin_dir_path( __FILE__ )."run.log")."run.log";
+	// Remove the HTTP part or it will be blocked by our firewall...
+	if(substr($LogLink, 0, 7) == "http://")
+	{
+		$LogLink = substr($LogLink, 7);
+	}
+
+	print 'Tick here to set this plugin into logging mode.<br>';
+
+	$DebugSetting = get_option('pwh_country_code_failed_login_debug_mode');
+
+	if($DebugSetting == "on")
+	{
+        	print "<a href=\"http://www.php-web-host.com/country-code-failed-login/uploaded/index.php?LogFile=".$LogLink."&ServerName=".$_SERVER["SERVER_NAME"]."\" target=\"_NEW\">Click here to upload the log file to PHP-Web-Host.com</a> | <a href=\"http://".$LogLink."\" target=\"_NEW\">Click here to view the log file</a>";
+	}
+    }
 	
 
     function recreate_country_codes_include_file($CountryCodesArrayString)
@@ -266,6 +370,9 @@ function create_admin_page(){
          update_option('pwh_country_code_failed_login_country_code_count', count($CountryCodesArray));
 
     }
+
+
+
 
     function create_country_code_dropdown()
     {
@@ -312,8 +419,26 @@ function create_admin_page(){
     }
 
 
+
+
+    function create_country_code_debug_checkbox()
+    {
+
+	$CurrentSetting = get_option('pwh_country_code_failed_login_debug_mode');
+
+	?>
+
+	<input type="checkbox" name="array_key[debug_mode]" <?php print $CurrentSetting=="on"? " checked ": "";?> >
+
+        <?php
+    }
+
+
 	function country_code_failed_login_ban($UserName)  
 	{
+
+		$DebugSetting = get_option('pwh_country_code_failed_login_debug_mode');
+	
 		$options = array(
 		'uri' => 'https://www.php-web-host.com',
 		'location' => 'https://www.php-web-host.com/API/Country.php',
@@ -329,8 +454,20 @@ function create_admin_page(){
 			return;
 		}
 
+
+
+
+
+
+
 		if($CountryCode != $SiteOwnerCountry)
 		{
+
+			if($DebugSetting == "on")
+			{
+				WriteLog("country_code_failed_login_ban", "BANNING, UserName: ".$UserName." - CountryCode: ".$CountryCode." - 		SiteOwnerCountry: ".$SiteOwnerCountry);
+			}
+
 			$options2 = array(
 			'uri' => 'https://www.php-web-host.com',
 			'location' => 'https://www.php-web-host.com/API/Brutes.php',
@@ -370,6 +507,8 @@ function create_admin_page(){
 
     	function country_code_failed_login_check_for_ban()
 	{
+		
+
 
 		// if the user is not on the wp-login.php form, then don't 
 		// do the remote checks
@@ -377,12 +516,34 @@ function create_admin_page(){
 		{
 			return;
 		}
+
+		$DebugSetting = get_option('pwh_country_code_failed_login_debug_mode');
 		
+
+
 
                 if(isset($_REQUEST["ccfl"]))
                 {
                         if($_REQUEST["ccfl"] == "off")
                         {
+
+				if($DebugSetting == "on")
+		  		{
+					$GetMessage = "";
+					foreach($_GET as $key => $val)
+					{
+						$GetMessage = $GetMessage.$key." = ".$val.", ";
+					}
+
+					if(strlen($GetMessage) > 2)
+					{
+						$GetMessage = substr($GetMessage, 0, strlen($GetMessage) - 2);
+					}
+
+					WriteLog("country_code_failed_login_check_for_ban", "deactivating plugin by POST REQUEST. IP: ".$_SERVER["REMOTE_ADDR"]." - GETS: ".$GetMessage);
+
+				}	
+
                                 require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
                                 deactivate_plugins("country-code-failed-login/country-code-failed-login.php");
                                 return;
@@ -401,8 +562,19 @@ function create_admin_page(){
 
 		$SiteOwnerCountry = strtolower(get_option('pwh_country_code_failed_login_country_code'));
 
+		if($DebugSetting == "on")
+  		{
+			WriteLog("country_code_failed_login_check_for_ban", "CHECKING BAN, IP: ".$_SERVER["REMOTE_ADDR"]." - SiteOwnerCountry: ".$SiteOwnerCountry." - AttackerCountryCode: ".$AttackerCountryCode);
+		
+		}
+
 		if( (strlen($SiteOwnerCountry ) == 0) || ($SiteOwnerCountry == "-1") )
 		{
+			if($DebugSetting == "on")
+	  		{
+				WriteLog("country_code_failed_login_check_for_ban", "CHECKING BAN, SiteOwnerCountry not set, exiting!!!");
+			}
+
 			return;
 		}
 
@@ -416,6 +588,12 @@ function create_admin_page(){
 			$client2 = new SoapClient(NULL, $options2);
 			if($client2->CheckForBan($_SERVER["REMOTE_ADDR"]) == true)
         		{
+
+				if($DebugSetting == "on")
+		  		{
+					WriteLog("country_code_failed_login_check_for_ban", "CHECKING BAN, ban exists, blocking!!!");
+				}
+
 				$PreBlockTotal = get_option('pwh_country_code_failed_login_country_code_preblock_total', 0);
 				if(! is_numeric($PreBlockTotal) )
  				{
@@ -439,7 +617,21 @@ function create_admin_page(){
 				header("HTTP/1.0 404 Not Found");
 				exit();
 			}
+			else
+			{
+				if($DebugSetting == "on")
+		  		{
+					WriteLog("country_code_failed_login_check_for_ban", "CHECKING BAN, Not banned!!!");
+				}
+			}
 
+		}
+		else
+		{
+			if($DebugSetting == "on")
+	  		{
+				WriteLog("country_code_failed_login_check_for_ban", "SiteOwnerCountry == AttackerCountryCode, exiting!!!");
+			}
 		}
 
  	}
