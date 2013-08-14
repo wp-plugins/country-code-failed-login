@@ -1,5 +1,5 @@
 <option value="af" <?php if($CurrentSetting == "af") print " selected "; ?>>Afghanistan (AF)</option>
-<option value="ax" <?php if($CurrentSetting == "ax") print " selected "; ?>>Åland Islands (AX)</option>
+<option value="ax" <?php if($CurrentSetting == "ax") print " selected "; ?>>Aland Islands (AX)</option>
 <option value="al" <?php if($CurrentSetting == "al") print " selected "; ?>>Albania (AL)</option>
 <option value="dz" <?php if($CurrentSetting == "dz") print " selected "; ?>>Algeria (DZ)</option>
 <option value="as" <?php if($CurrentSetting == "as") print " selected "; ?>>American Samoa (AS)</option>

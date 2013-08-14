@@ -3,7 +3,7 @@ Contributors: jsmcm
 Tags: brute force, login, failed login, country ban, country block, attack, security, country code failed login
 Requires at least: 3.5.1
 Tested up to: 3.6.0
-Stable tag: 1.0.6
+Stable tag: 1.0.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -94,6 +94,9 @@ Nothing... The plugin won't log bad IPs and it won't block IPs either. Its essen
 4. When logging in you can see a brief overview of attacks blocked in the Dashboard screen
 
 == Changelog ==
+
+= 1.0.7 =
+* Bug fix. First check if the debug file exists before attempting to delete it!
 
 = 1.0.6 =
 * Added logging capabilities.
