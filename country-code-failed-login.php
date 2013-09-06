@@ -3,7 +3,7 @@
 Plugin Name: Country Code Failed Login
 Plugin URI: https://www.php-web-host.com/wordpress/plugins/country-code-failed-login-wordpress-plugin/
 Description: Log and block IP addresses after a single failed login attempt if they are from different country to you.
-Version: 1.0.7
+Version: 1.0.8
 Author: PHP-Web-Host.com
 Author URI: https://www.php-web-host.com
 License: GPL2
@@ -72,7 +72,7 @@ function shutdownFunction()
 	
     	$error = error_get_last();
 
- 	if ( ($error['type'] == 1) && (strstr(strtolower($error['message']), 'soapclient') ) )
+ 	if ( ($error['type'] == 1) && (strstr(strtolower($error['message']), 'soapclient') ) && (strstr(strtolower($error['message']), 'not found') ) )
 	{
         	//disable the plugin
 
@@ -100,6 +100,24 @@ function shutdownFunction()
                 print "<h1 style=\"color:red;\">ERROR!</h1>Your server does not appear to have SOAP installed. SOAP is required for Country Code Failed Login plugin to work, so its been disabled!<p>Please check with your web hosting provider why SOAP is not enabled.<p><a href=\"https://www.php-web-host.com\">PHP-Web-Host.com's servers are optimised for Wordpress</a><p><a href=\"wp-login.php\">Click here to try logging in again</a>";
 		exit();
     	} 
+        else
+        {
+		if($DebugSetting == "on")
+		{
+			$PostMessage = "";
+			foreach($_POST as $key => $val)
+			{
+				$PostMessage = $PostMessage.$key." = ".$val.", ";
+			}
+
+			if(strlen($PostMessage) > 1)
+			{
+				$PostMessage = substr($PostMessage, 0, strlen($PostMessage) - 2);
+			}
+
+			WriteLog("shutdownFunction", "NOT deactivating plugin ANYMORE. IP: ".$_SERVER["REMOTE_ADDR"]." - Error Type: ".$error["type"]." - Error Message: ".$error["message"]." - POSTS: ".$PostMessage);
+		}
+        }
 
 }
 
