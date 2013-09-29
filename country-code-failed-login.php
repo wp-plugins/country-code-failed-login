@@ -3,7 +3,7 @@
 Plugin Name: Country Code Failed Login
 Plugin URI: https://www.php-web-host.com/wordpress/plugins/country-code-failed-login-wordpress-plugin/
 Description: Log and block IP addresses after a single failed login attempt if they are from different country to you.
-Version: 1.0.8
+Version: 2.0.0
 Author: PHP-Web-Host.com
 Author URI: https://www.php-web-host.com
 License: GPL2
@@ -25,6 +25,7 @@ License: GPL2
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+register_activation_hook( __FILE__, 'db_install' );
 
 add_action( 'admin_menu', 'country_code_failed_login_menu');
 add_action('admin_init', 'page_init');
@@ -42,6 +43,35 @@ add_action('admin_notices', 'country_code_failed_login_notice');
 add_action('rightnow_end', 'country_code_failed_login_rightnow');
 
 register_shutdown_function('shutdownFunction');
+
+
+
+global $pwh_ccfl_db_version;
+$pwh_ccfl_db_version = "2.0.0";
+
+function db_install() 
+{
+	global $wpdb;
+   	global $pwh_ccfl_db_version;
+
+  	$table_name = $wpdb->prefix . "pwh_ccfl_bad_ip";
+      
+   $sql = "CREATE TABLE $table_name (
+  id mediumint(9) NOT NULL AUTO_INCREMENT,
+  attacker_ip tinytext NOT NULL,
+  country_code tinytext,
+  expire_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+  UNIQUE KEY id (id)
+    );";
+
+   require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+   dbDelta( $sql );
+ 
+   add_option( "pwh_ccfl_db_version", $pwh_ccfl_db_version );
+}
+
+
+
 
 
 function WriteLog($FunctionName, $Message)
@@ -164,6 +194,11 @@ function create_admin_page(){
 
 		    print "<p><b>Disabling debug clears the log file</b></p>";
 
+			if(filesize(plugin_dir_path( __FILE__ )."run.log") > 2097152)
+			{
+		    		print "<p><b style=\"color:red;\">WARNING: Your log file is bigger than 2 Mb already, consider turning logging off</b><p>";
+			}
+
 		?>
 	        <?php submit_button(); ?>
 	    </form>
@@ -186,7 +221,9 @@ function create_admin_page(){
 
 	?>
 	IPs blocked by other sites in the network which tried to get to you!!! <b>Total: <?php print $PreBlockTotal; ?></b><br>
-	IPs blocked by other sites in the network which tried to get to you this month: <b><?php print $PreBlockMonth ; ?></b><p>
+	IPs blocked by other sites in the network which tried to get to you this month: <b><?php print $PreBlockMonth ; ?>
+
+</b><p>
 
 
 	<?php
@@ -484,6 +521,17 @@ function create_admin_page(){
 		if($CountryCode != $SiteOwnerCountry)
 		{
 
+
+
+			if($DebugSetting == "on")
+			{
+				WriteLog("country_code_failed_login_check_for_ban", "Adding to local ban");
+			}
+
+			country_code_failed_login_add_local_ban($_SERVER["REMOTE_ADDR"], $CountryCode);
+
+
+
 			if($DebugSetting == "on")
 			{
 				WriteLog("country_code_failed_login_ban", "BANNING, UserName: ".$UserName." - CountryCode: ".$CountryCode." - 		SiteOwnerCountry: ".$SiteOwnerCountry);
@@ -526,11 +574,64 @@ function create_admin_page(){
 
 	}
 
+	function country_code_failed_login_delete_expired_local_ban()
+	{
+		$DebugSetting = get_option('pwh_country_code_failed_login_debug_mode');
+        	global $wpdb;
+
+		if($DebugSetting == "on")
+	  	{
+			WriteLog("country_code_failed_login_delete_expired_local_ban", "DELETE FROM ".$wpdb->prefix."pwh_ccfl_bad_ip WHERE expire_time < '" .date("Y-m-d H:i:s")."'");
+		}
+
+		$wpdb->query("DELETE FROM ".$wpdb->prefix."pwh_ccfl_bad_ip WHERE expire_time < '" .date("Y-m-d H:i:s")."'");
+
+	}
+
+
+	function country_code_failed_login_add_local_ban($IP, $CountryCode)
+	{
+		$DebugSetting = get_option('pwh_country_code_failed_login_debug_mode');
+        	global $wpdb;
+
+		$date = date_create(date("Y-m-d H:i:s"));
+		date_add($date, date_interval_create_from_date_string('7 days'));
+	
+		$rows_affected = $wpdb->insert( $wpdb->prefix."pwh_ccfl_bad_ip", array( 'id' => 0, 'attacker_ip' => $IP, 'country_code' => $CountryCode, 'expire_time' => date_format($date, 'Y-m-d H:i:s') ) );
+
+	}
+
+	function country_code_failed_login_local_ban_exists($AttackerID)
+	{
+
+		country_code_failed_login_delete_expired_local_ban();
+
+		$DebugSetting = get_option('pwh_country_code_failed_login_debug_mode');
+
+        	global $wpdb;
+		$post = $wpdb->get_row("SELECT * FROM ".$wpdb->prefix."pwh_ccfl_bad_ip WHERE attacker_ip = '".$AttackerID."'", ARRAY_A);
+
+		if($DebugSetting == "on")
+	  	{
+			WriteLog("country_code_failed_login_local_ban_exists", "SELECT * FROM ".$wpdb->prefix."pwh_ccfl_bad_ip WHERE attacker_ip = '".$AttackerID."'");
+			WriteLog("country_code_failed_login_local_ban_exists", "local ban count: ".count($post));
+		}
+
+		if(count($post) > 0)
+		{
+			if($DebugSetting == "on")
+	  		{
+				WriteLog("country_code_failed_login_local_ban_exists", "Attacker IP: ".$post["attacker_ip"]);
+			}
+
+			return true;
+		}
+
+		return false;
+	}
+
     	function country_code_failed_login_check_for_ban()
 	{
-		
-
-
 		// if the user is not on the wp-login.php form, then don't 
 		// do the remote checks
 		if( ! strstr($_SERVER["REQUEST_URI"], "wp-login.php"))
@@ -540,9 +641,6 @@ function create_admin_page(){
 
 		$DebugSetting = get_option('pwh_country_code_failed_login_debug_mode');
 		
-
-
-
                 if(isset($_REQUEST["ccfl"]))
                 {
                         if($_REQUEST["ccfl"] == "off")
@@ -572,6 +670,27 @@ function create_admin_page(){
                 }
 
 
+		if($DebugSetting == "on")
+	  	{
+			WriteLog("country_code_failed_login_check_for_ban", "Checking if local ban exists");
+		}
+
+		if(country_code_failed_login_local_ban_exists($_SERVER["REMOTE_ADDR"]) == true)
+		{
+
+			if($DebugSetting == "on")
+		  	{
+				WriteLog("country_code_failed_login_check_for_ban", "Local ban does exist");
+			}
+	
+			header("HTTP/1.0 404 Not Found");
+			exit();
+		}
+
+		if($DebugSetting == "on")
+	  	{
+			WriteLog("country_code_failed_login_check_for_ban", "Local ban does not exist");
+		}
 
 		$options = array(
 		'uri' => 'https://www.php-web-host.com',
@@ -614,6 +733,16 @@ function create_admin_page(){
 		  		{
 					WriteLog("country_code_failed_login_check_for_ban", "CHECKING BAN, ban exists, blocking!!!");
 				}
+
+				// If we got here it does not exist in local ban table, add it now!
+
+				if($DebugSetting == "on")
+			  	{
+					WriteLog("country_code_failed_login_check_for_ban", "Adding to local ban");
+				}
+
+				country_code_failed_login_add_local_ban($_SERVER["REMOTE_ADDR"], $AttackerCountryCode);
+
 
 				$PreBlockTotal = get_option('pwh_country_code_failed_login_country_code_preblock_total', 0);
 				if(! is_numeric($PreBlockTotal) )

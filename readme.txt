@@ -3,7 +3,7 @@ Contributors: jsmcm
 Tags: brute force, login, failed login, country ban, country block, attack, security, country code failed login
 Requires at least: 3.5.1
 Tested up to: 3.6.0
-Stable tag: 1.0.8
+Stable tag: 2.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -95,6 +95,9 @@ Nothing... The plugin won't log bad IPs and it won't block IPs either. Its essen
 
 == Changelog ==
 
+= 2.0.0 =
+* Plugin stores banned IPs locally now to minimise external connections (particularly during an active attack!!)
+
 = 1.0.8 =
 * Bug fix. prevents accidental automatic disabling of the plugin!
 
@@ -130,9 +133,11 @@ Nothing... The plugin won't log bad IPs and it won't block IPs either. Its essen
 
 == Upgrade Notice ==
 
+= 2.0.0 =
+In previous versions, an external server hosted by www.php-web-host.com was solely responsible for banned IP lookups. During an active attack, this could cause very high loads on your server as it has to constantly connect to our server for the lookup. Version 2.0.0 now stores info about banned IPs locally to eliminate constant external lookups
+
 = 1.0.6 =
 Added logging capability which allows the user to view run time logs, or click a link to automatically upload those logs to PHP-Web-Host.com's servers for inspection.
 
 = 1.0.1 =
 The test to see if the user is actually on the wp-login.php screen before doing remote ban lookups is important for page load speeds
-
