@@ -3,7 +3,7 @@
 Plugin Name: Country Code Failed Login
 Plugin URI: https://www.php-web-host.com/wordpress/plugins/country-code-failed-login-wordpress-plugin/
 Description: Log and block IP addresses after a single failed login attempt if they are from different country to you.
-Version: 2.0.2
+Version: 2.0.3
 Author: PHP-Web-Host.com
 Author URI: https://www.php-web-host.com
 License: GPL2
@@ -101,13 +101,12 @@ function shutdownFunction()
 {
 	
     	$error = error_get_last();
-
+	$DebugSetting = get_option('pwh_country_code_failed_login_debug_mode');
+	
  	if ( ($error['type'] == 1) && (strstr(strtolower($error['message']), 'soapclient') ) && (strstr(strtolower($error['message']), 'not found') ) )
 	{
         	//disable the plugin
 
-		$DebugSetting = get_option('pwh_country_code_failed_login_debug_mode');
-	
 		if($DebugSetting == "on")
 		{
 			$PostMessage = "";
