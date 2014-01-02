@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: Country Code Failed Login
-Plugin URI: https://www.php-web-host.com/wordpress/plugins/country-code-failed-login-wordpress-plugin/
+Plugin URI: http://www.php-web-host.com/wordpress/plugins/country-code-failed-login-wordpress-plugin/
 Description: Log and block IP addresses after a single failed login attempt if they are from different country to you.
-Version: 2.0.2
+Version: 2.0.4
 Author: PHP-Web-Host.com
-Author URI: https://www.php-web-host.com
+Author URI: http://www.php-web-host.com
 License: GPL2
 */
 
@@ -101,13 +101,12 @@ function shutdownFunction()
 {
 	
     	$error = error_get_last();
-
+	$DebugSetting = get_option('pwh_country_code_failed_login_debug_mode');
+	
  	if ( ($error['type'] == 1) && (strstr(strtolower($error['message']), 'soapclient') ) && (strstr(strtolower($error['message']), 'not found') ) )
 	{
         	//disable the plugin
 
-		$DebugSetting = get_option('pwh_country_code_failed_login_debug_mode');
-	
 		if($DebugSetting == "on")
 		{
 			$PostMessage = "";
@@ -127,7 +126,7 @@ function shutdownFunction()
                 require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
                 deactivate_plugins("country-code-failed-login/country-code-failed-login.php");
 
-                print "<h1 style=\"color:red;\">ERROR!</h1>Your server does not appear to have SOAP installed. SOAP is required for Country Code Failed Login plugin to work, so its been disabled!<p>Please check with your web hosting provider why SOAP is not enabled.<p><a href=\"https://www.php-web-host.com\">PHP-Web-Host.com's servers are optimised for Wordpress</a><p><a href=\"wp-login.php\">Click here to try logging in again</a>";
+                print "<h1 style=\"color:red;\">ERROR!</h1>Your server does not appear to have SOAP installed. SOAP is required for Country Code Failed Login plugin to work, so its been disabled!<p>Please check with your web hosting provider why SOAP is not enabled.<p><a href=\"http://www.php-web-host.com\">PHP-Web-Host.com's servers are optimised for Wordpress</a><p><a href=\"wp-login.php\">Click here to try logging in again</a>";
 		exit();
     	} 
         else
@@ -208,7 +207,7 @@ function create_admin_page(){
 	    </form>
 
             <hr>
-            <a style="font-size:18px; font-weight:bold;" href="https://www.php-web-host.com/brutes/ViewAttacks.php?Domain=<?php print $_SERVER["SERVER_NAME"]; ?>" target="_BLANK">Click here to view successful blocks</a> | <a style="font-size:18px; font-weight:bold;" href="https://www.php-web-host.com/brutes/ViewUserNames.php" target="_BLANK">Click here to view most commonly attacked usernames</a><p>
+            <a style="font-size:18px; font-weight:bold;" href="http://www.php-web-host.com/brutes/ViewAttacks.php?Domain=<?php print $_SERVER["SERVER_NAME"]; ?>" target="_BLANK">Click here to view successful blocks</a> | <a style="font-size:18px; font-weight:bold;" href="http://www.php-web-host.com/brutes/ViewUserNames.php" target="_BLANK">Click here to view most commonly attacked usernames</a><p>
 
 	<?php
 	$PreBlockTotal = get_option('pwh_country_code_failed_login_country_code_preblock_total', 0);
@@ -249,8 +248,8 @@ function create_admin_page(){
 
 	<?php
 	$options2 = array(
-	'uri' => 'https://www.php-web-host.com',
-	'location' => 'https://www.php-web-host.com/API/Brutes.php',
+	'uri' => 'http://www.php-web-host.com',
+	'location' => 'http://www.php-web-host.com/API/Brutes.php',
 	'trace' => 1);
 
 	$client = new SoapClient(NULL, $options2);
@@ -284,19 +283,19 @@ function create_admin_page(){
 <div class="fb-like" data-href="http://za24.in/AJ3" data-send="false" data-width="50" data-show-faces="false"></div>
 <p>
 
-<a style="margin-left:15px;" href="https://www.google.com/bookmarks/mark?op=edit&amp;bkmk=http://za24.in/AJ3&amp;title=My+Wordpress+site+has+blocked+<?php print $BlockTotal; ?>+brute+force+attacks+(protected+from+<?php print $PreBlockTotal; ?>+attacks)+with+Country+Code+Failed+Login+Plugin" target="_blank"><img src="https://www.php-web-host.com/wp-content/themes/wpboheme/images/social-icons/googleplus.png" alt="google" width="20" height="20"></a> 
+<a style="margin-left:15px;" href="https://www.google.com/bookmarks/mark?op=edit&amp;bkmk=http://za24.in/AJ3&amp;title=My+Wordpress+site+has+blocked+<?php print $BlockTotal; ?>+brute+force+attacks+(protected+from+<?php print $PreBlockTotal; ?>+attacks)+with+Country+Code+Failed+Login+Plugin" target="_blank"><img src="http://www.php-web-host.com/wp-content/themes/wpboheme/images/social-icons/googleplus.png" alt="google" width="20" height="20"></a> 
 
-<a style="margin-left:15px;"  href="https://twitter.com/home?status=My+Wordpress+site+has+blocked+<?php print $BlockTotal; ?>+brute+force+attacks+with+Country+Code+Failed+Login+Plugin http://za24.in/AJ3"><img src="https://www.php-web-host.com/wp-content/themes/wpboheme/images/social-icons/twitter.png" alt="twiter" width="20" height="20"></a> 
+<a style="margin-left:15px;"  href="https://twitter.com/home?status=My+Wordpress+site+has+blocked+<?php print $BlockTotal; ?>+brute+force+attacks+with+Country+Code+Failed+Login+Plugin http://za24.in/AJ3"><img src="http://www.php-web-host.com/wp-content/themes/wpboheme/images/social-icons/twitter.png" alt="twiter" width="20" height="20"></a> 
 
-<a style="margin-left:15px;"  href="https://linkedin.com/shareArticle?mini=true&amp;url=http://za24.in/AJ3&amp;title=My+Wordpress+site+has+blocked+<?php print $BlockTotal; ?>+brute+force+attacks+(protected+from+<?php print $PreBlockTotal; ?>+attacks)+with+Country+Code+Failed+Login+Plugin" target="_blank"><img src="https://www.php-web-host.com/wp-content/themes/wpboheme/images/social-icons/linkedin.png" alt="linkedin" width="20" height="20"></a> 
+<a style="margin-left:15px;"  href="https://linkedin.com/shareArticle?mini=true&amp;url=http://za24.in/AJ3&amp;title=My+Wordpress+site+has+blocked+<?php print $BlockTotal; ?>+brute+force+attacks+(protected+from+<?php print $PreBlockTotal; ?>+attacks)+with+Country+Code+Failed+Login+Plugin" target="_blank"><img src="http://www.php-web-host.com/wp-content/themes/wpboheme/images/social-icons/linkedin.png" alt="linkedin" width="20" height="20"></a> 
 
-<a style="margin-left:15px;"  href="https://digg.com/submit?phase=2&amp;url=http://za24.in/AJ3&amp;bodytext=&amp;tags=&amp;title=My+Wordpress+site+has+blocked+<?php print $BlockTotal; ?>+brute+force+attacks+(protected+from+<?php print $PreBlockTotal; ?>+attacks)+with+Country+Code+Failed+Login+Plugin" target="_blank"><img src="https://www.php-web-host.com/wp-content/themes/wpboheme/images/social-icons/digg.png" alt="linkedin" width="20" height="20"></a> 
+<a style="margin-left:15px;"  href="https://digg.com/submit?phase=2&amp;url=http://za24.in/AJ3&amp;bodytext=&amp;tags=&amp;title=My+Wordpress+site+has+blocked+<?php print $BlockTotal; ?>+brute+force+attacks+(protected+from+<?php print $PreBlockTotal; ?>+attacks)+with+Country+Code+Failed+Login+Plugin" target="_blank"><img src="http://www.php-web-host.com/wp-content/themes/wpboheme/images/social-icons/digg.png" alt="linkedin" width="20" height="20"></a> 
 
-<a style="margin-left:15px;"  href="https://ssl.reddit.com/submit?url=http://za24.in/AJ3&amp;title=My+Wordpress+site+has+blocked+<?php print $BlockTotal; ?>+brute+force+attacks+(protected+from+12000000333+attacks)+with+Country+Code+Failed+Login+Plugin" target="_blank"><img src="https://www.php-web-host.com/wp-content/themes/wpboheme/images/social-icons/reddit.png" alt="linkedin" width="20" height="20"></a> 
+<a style="margin-left:15px;"  href="https://ssl.reddit.com/submit?url=http://za24.in/AJ3&amp;title=My+Wordpress+site+has+blocked+<?php print $BlockTotal; ?>+brute+force+attacks+(protected+from+12000000333+attacks)+with+Country+Code+Failed+Login+Plugin" target="_blank"><img src="http://www.php-web-host.com/wp-content/themes/wpboheme/images/social-icons/reddit.png" alt="linkedin" width="20" height="20"></a> 
 
-<a style="margin-left:15px;"  href="https://www.delicious.com/post?v=2&amp;url==http://za24.in/AJ3&amp;notes=&amp;tags=&amp;title=My+Wordpress+site+has+blocked+<?php print $BlockTotal; ?>+brute+force+attacks+(protected+from+<?php print $PreBlockTotal; ?>+attacks)+with+Country+Code+Failed+Login+Plugin" target="_blank"><img src="https://www.php-web-host.com/wp-content/themes/wpboheme/images/social-icons/delicious.png" alt="linkedin" width="20" height="20"></a> 
+<a style="margin-left:15px;"  href="https://www.delicious.com/post?v=2&amp;url==http://za24.in/AJ3&amp;notes=&amp;tags=&amp;title=My+Wordpress+site+has+blocked+<?php print $BlockTotal; ?>+brute+force+attacks+(protected+from+<?php print $PreBlockTotal; ?>+attacks)+with+Country+Code+Failed+Login+Plugin" target="_blank"><img src="http://www.php-web-host.com/wp-content/themes/wpboheme/images/social-icons/delicious.png" alt="linkedin" width="20" height="20"></a> 
 
-<a style="margin-left:15px;"  href="mailto:?subject=Wordpress Brute Force Protection Plugin&amp;body=My Wordpress site has blocked <?php print $BlockTotal; ?> brute force attacks (protected+from <?php print $PreBlockTotal; ?> attacks) with Country Code Failed Login Plugin -- http://za24.in/AJ3" target="_blank"><img src="https://www.php-web-host.com/wp-content/themes/wpboheme/images/social-icons/email.png" alt="linkedin" width="20" height="20"></a>
+<a style="margin-left:15px;"  href="mailto:?subject=Wordpress Brute Force Protection Plugin&amp;body=My Wordpress site has blocked <?php print $BlockTotal; ?> brute force attacks (protected+from <?php print $PreBlockTotal; ?> attacks) with Country Code Failed Login Plugin -- http://za24.in/AJ3" target="_blank"><img src="http://www.php-web-host.com/wp-content/themes/wpboheme/images/social-icons/email.png" alt="linkedin" width="20" height="20"></a>
 
 </div>
 
@@ -453,8 +452,8 @@ function create_admin_page(){
         // Check if there are new country codes on the remote server..
         // Pass in the local count. If there are more on the server it also fills an array with the country codes.
 	//$options = array(
-	//'uri' => 'https://www.php-web-host.com',
-	//'location' => 'https://www.php-web-host.com/API/Country.php',
+	//'uri' => 'http://www.php-web-host.com',
+	//'location' => 'http://www.php-web-host.com/API/Country.php',
 	//'trace' => 1);
 	
 	//$client = new SoapClient(NULL, $options);
@@ -502,8 +501,8 @@ function create_admin_page(){
 		$DebugSetting = get_option('pwh_country_code_failed_login_debug_mode');
 	
 		$options = array(
-		'uri' => 'https://www.php-web-host.com',
-		'location' => 'https://www.php-web-host.com/API/Country.php',
+		'uri' => 'http://www.php-web-host.com',
+		'location' => 'http://www.php-web-host.com/API/Country.php',
 		'trace' => 1);
 		
 		$client = new SoapClient(NULL, $options);
@@ -542,8 +541,8 @@ function create_admin_page(){
 			}
 
 			$options2 = array(
-			'uri' => 'https://www.php-web-host.com',
-			'location' => 'https://www.php-web-host.com/API/Brutes.php',
+			'uri' => 'http://www.php-web-host.com',
+			'location' => 'http://www.php-web-host.com/API/Brutes.php',
 			'trace' => 1);
 
 			$client2 = new SoapClient(NULL, $options2);
@@ -705,8 +704,8 @@ function create_admin_page(){
 		}
 
 		$options = array(
-		'uri' => 'https://www.php-web-host.com',
-		'location' => 'https://www.php-web-host.com/API/Country.php',
+		'uri' => 'http://www.php-web-host.com',
+		'location' => 'http://www.php-web-host.com/API/Country.php',
 		'trace' => 1);
 		
 		$client = new SoapClient(NULL, $options);
@@ -733,8 +732,8 @@ function create_admin_page(){
 		if($AttackerCountryCode != $SiteOwnerCountry )
 		{
 			$options2 = array(
-			'uri' => 'https://www.php-web-host.com',
-			'location' => 'https://www.php-web-host.com/API/Brutes.php',
+			'uri' => 'http://www.php-web-host.com',
+			'location' => 'http://www.php-web-host.com/API/Brutes.php',
 			'trace' => 1);
 
 			$client2 = new SoapClient(NULL, $options2);

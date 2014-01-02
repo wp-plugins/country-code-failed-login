@@ -3,7 +3,7 @@ Contributors: jsmcm
 Tags: brute force, login, failed login, country ban, country block, attack, security, country code failed login
 Requires at least: 3.5.1
 Tested up to: 3.6.0
-Stable tag: 2.0.2
+Stable tag: 2.0.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -95,8 +95,14 @@ Nothing... The plugin won't log bad IPs and it won't block IPs either. Its essen
 
 == Changelog ==
 
+= 2.0.4 =
+* Update remote URL in plugin file
+
+= 2.0.3 =
+* Tiny bug fix with an undeclared variable which causes a warning message on some sites
+
 = 2.0.2 =
-* Checks if the debug file exists before checking its size ;P 
+* Checks if the debug file exists before checking its size 
 
 = 2.0.1 =
 * Does not require deactivation / reactivation to create custom db to store local ips
