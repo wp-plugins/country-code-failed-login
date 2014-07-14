@@ -3,7 +3,7 @@ Contributors: jsmcm
 Tags: brute force, login, failed login, country ban, country block, attack, security, country code failed login
 Requires at least: 3.5.1
 Tested up to: 3.6.0
-Stable tag: 2.0.4
+Stable tag: 2.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -11,9 +11,9 @@ Log and block IP addresses after a single failed login attempt if they are from 
 
 == Description ==
 
-Site: [PHP-Web-Host.com - Country Code Failed Login Attempts, Wordpress plugin](http://www.php-web-host.com/wordpress/plugins/country-code-failed-login-wordpress-plugin/ "Country Code Failed Login Attempts,")
+Site: [phpwebhost.co.za - Country Code Failed Login Attempts, Wordpress plugin](http://www.phpwebhost.co.za/wordpress/plugins/country-code-failed-login-wordpress-plugin/ "Country Code Failed Login Attempts,")
 
-This plugin checks the two letter country code of anyone trying to login to wp-login.php. If the country code is different to your country code which you selected in the setup and the login fails a single attempt, it lists the IP address to a database hosted with PHP-Web-Host.com. 
+This plugin checks the two letter country code of anyone trying to login to wp-login.php. If the country code is different to your country code which you selected in the setup and the login fails a single attempt, it lists the IP address to a database hosted with phpwebhost.co.za. 
 
 Each time a login attempt is made from a country code outside of your own, the IP address is checked against this database and if the IP address is in the block list, the wp-login.php form is not displayed. 
 
@@ -57,7 +57,7 @@ Wordpress Install (easiest)
 = After installing this plugin my wp-login.php form crashed (500 server error or similar) =
 
 This may happen if your web hosting company has not configured their server to handle SOAP. The first thing you should do is ask them why! Then to access your login form go to your wp-login.php form and add the ccfl=off parameter, eg, http://yoursite.com/wp-login.php?ccfl=off
-If this seems confusing, please go to http://www.php-web-host.com/wordpress/country-code-failed-login/ccfl.php for more info and we'll help you get in!
+If this seems confusing, please go to http://www.phpwebhost.co.za/wordpress/country-code-failed-login/ccfl.php for more info and we'll help you get in!
 
 
 = We have users from multiple countries logging in, can we use this plugin? =
@@ -94,6 +94,14 @@ Nothing... The plugin won't log bad IPs and it won't block IPs either. Its essen
 4. When logging in you can see a brief overview of attacks blocked in the Dashboard screen
 
 == Changelog ==
+
+= 2.1.1 =
+* Some minor errors were introduced when making the plugin translation ready.
+
+= 2.1.0 =
+* Changed lookups to new dedicated server at api.phpwebhost.co.za
+* Changed all links to www.phpwebhost.co.za
+* Added support for language translations
 
 = 2.0.4 =
 * Update remote URL in plugin file
@@ -136,7 +144,7 @@ Nothing... The plugin won't log bad IPs and it won't block IPs either. Its essen
 * Added a message loader function to import announcements / news and update messages from the main server into the settings screen.
 * Added a message dialog in the dashboard's right now box to show stats
 * Added new stats in the settings screens. Blocked by you this month and Attacks against you blocked by the network this month
-* Added a check in check_ban routine to see if the request page was the wp-login.php form. If not it returns. This saves on external lookups to the PHP-Web-Host.com server 
+* Added a check in check_ban routine to see if the request page was the wp-login.php form. If not it returns. This saves on external lookups to the phpwebhost.co.za server 
 
 = 1.0.0 =
 * This is the first version :)
@@ -146,10 +154,10 @@ Nothing... The plugin won't log bad IPs and it won't block IPs either. Its essen
 == Upgrade Notice ==
 
 = 2.0.0 =
-In previous versions, an external server hosted by www.php-web-host.com was solely responsible for banned IP lookups. During an active attack, this could cause very high loads on your server as it has to constantly connect to our server for the lookup. Version 2.0.0 now stores info about banned IPs locally to eliminate constant external lookups
+In previous versions, an external server hosted by www.phpwebhost.co.za was solely responsible for banned IP lookups. During an active attack, this could cause very high loads on your server as it has to constantly connect to our server for the lookup. Version 2.0.0 now stores info about banned IPs locally to eliminate constant external lookups
 
 = 1.0.6 =
-Added logging capability which allows the user to view run time logs, or click a link to automatically upload those logs to PHP-Web-Host.com's servers for inspection.
+Added logging capability which allows the user to view run time logs, or click a link to automatically upload those logs to phpwebhost.co.za's servers for inspection.
 
 = 1.0.1 =
 The test to see if the user is actually on the wp-login.php screen before doing remote ban lookups is important for page load speeds
