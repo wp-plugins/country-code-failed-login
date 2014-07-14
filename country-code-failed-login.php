@@ -3,7 +3,7 @@
 Plugin Name: Country Code Failed Login
 Plugin URI: http://www.phpwebhost.co.za/wordpress/plugins/country-code-failed-login-wordpress-plugin/
 Description: Log and block IP addresses after a single failed login attempt if they are from different country to you.
-Version: 2.1.0
+Version: 2.1.1
 Author: www.phpwebhost.co.za
 Author URI: http://www.phpwebhost.co.za
 License: GPL2
@@ -264,7 +264,7 @@ function create_admin_page(){
 
      $Announcements = $client->Announcements(strtolower(get_option('pwh_country_code_failed_login_country_code')));
 
-     __("IPs currently blocked in the entire network", "country_code_failed_login")." (".strtolower(get_option('pwh_country_code_failed_login_country_code')).") <b>".__("Total", "country_code_failed_login").": ".$TotalNetworkBlock."</b>";
+     print __("IPs currently blocked in the entire network", "country_code_failed_login")." (".strtolower(get_option('pwh_country_code_failed_login_country_code')).") <b>".__("Total", "country_code_failed_login").": ".$TotalNetworkBlock."</b>";
 
 
 
@@ -585,14 +585,14 @@ function create_admin_page(){
 
      }
 
-     function country_code_failed_login_delete__xpired_local_ban()
+     function country_code_failed_login_delete_expired_local_ban()
      {
           $DebugSetting = get_option('pwh_country_code_failed_login_debug_mode');
           global $wpdb;
 
           if($DebugSetting == "on")
           {
-               WriteLog("country_code_failed_login_delete__xpired_local_ban", "DELETE FROM ".$wpdb->prefix."pwh_ccfl_bad_ip WHERE expire_time < '" .date("Y-m-d H:i:s")."'");
+               WriteLog("country_code_failed_login_delete_expired_local_ban", "DELETE FROM ".$wpdb->prefix."pwh_ccfl_bad_ip WHERE expire_time < '" .date("Y-m-d H:i:s")."'");
           }
 
           $wpdb->query("DELETE FROM ".$wpdb->prefix."pwh_ccfl_bad_ip WHERE expire_time < '" .date("Y-m-d H:i:s")."'");
@@ -612,7 +612,7 @@ function create_admin_page(){
 
      }
 
-     function country_code_failed_login_local_ban__xists($AttackerID)
+     function country_code_failed_login_local_ban_exists($AttackerID)
      {
 
           global $wpdb;
@@ -623,7 +623,7 @@ function create_admin_page(){
           }
 
 
-          country_code_failed_login_delete__xpired_local_ban();
+          country_code_failed_login_delete_expired_local_ban();
 
           $DebugSetting = get_option('pwh_country_code_failed_login_debug_mode');
 
@@ -632,15 +632,15 @@ function create_admin_page(){
 
           if($DebugSetting == "on")
           {
-               WriteLog("country_code_failed_login_local_ban__xists", "SELECT * FROM ".$wpdb->prefix."pwh_ccfl_bad_ip WHERE attacker_ip = '".$AttackerID."'");
-               WriteLog("country_code_failed_login_local_ban__xists", "local ban count: ".count($post));
+               WriteLog("country_code_failed_login_local_ban_exists", "SELECT * FROM ".$wpdb->prefix."pwh_ccfl_bad_ip WHERE attacker_ip = '".$AttackerID."'");
+               WriteLog("country_code_failed_login_local_ban_exists", "local ban count: ".count($post));
           }
 
           if(count($post) > 0)
           {
                if($DebugSetting == "on")
                {
-                    WriteLog("country_code_failed_login_local_ban__xists", "Attacker IP: ".$post["attacker_ip"]);
+                    WriteLog("country_code_failed_login_local_ban_exists", "Attacker IP: ".$post["attacker_ip"]);
                }
 
                return true;
@@ -694,7 +694,7 @@ function create_admin_page(){
                WriteLog("country_code_failed_login_check_for_ban", "Checking if local ban exists");
           }
 
-          if(country_code_failed_login_local_ban__xists($_SERVER["REMOTE_ADDR"]) == true)
+          if(country_code_failed_login_local_ban_exists($_SERVER["REMOTE_ADDR"]) == true)
           {
 
                if($DebugSetting == "on")
