@@ -3,7 +3,7 @@ Contributors: jsmcm
 Tags: brute force, login, failed login, country ban, country block, attack, security, country code failed login
 Requires at least: 3.5.1
 Tested up to: 3.6.0
-Stable tag: 2.1.1
+Stable tag: 2.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -95,6 +95,10 @@ Nothing... The plugin won't log bad IPs and it won't block IPs either. Its essen
 
 == Changelog ==
 
+= 2.2.0 =
+* Country Code lookups are stored in a local table now to prevent multiple lookups via the web. They expire after 365 days
+* IPs which are not listed are cached for that session and good health IPs cause the script to return without expensive lookups.
+
 = 2.1.1 =
 * Some minor errors were introduced when making the plugin translation ready.
 
@@ -152,6 +156,9 @@ Nothing... The plugin won't log bad IPs and it won't block IPs either. Its essen
 
 
 == Upgrade Notice ==
+
+= 2.2.0 =
+Continuing on from version 2.0.0, not only are banned IPs cached locally now but also IP address's corresponding country codes. These are stored locally for 365 days. This dramatically reduces the number of lookups over the internet. Not only that, but a "clean" ip address is cached too in a session variable to prevent multiple lookups during a single session
 
 = 2.0.0 =
 In previous versions, an external server hosted by www.phpwebhost.co.za was solely responsible for banned IP lookups. During an active attack, this could cause very high loads on your server as it has to constantly connect to our server for the lookup. Version 2.0.0 now stores info about banned IPs locally to eliminate constant external lookups

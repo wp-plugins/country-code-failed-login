@@ -3,7 +3,7 @@
 Plugin Name: Country Code Failed Login
 Plugin URI: http://www.phpwebhost.co.za/wordpress/plugins/country-code-failed-login-wordpress-plugin/
 Description: Log and block IP addresses after a single failed login attempt if they are from different country to you.
-Version: 2.1.1
+Version: 2.2.0
 Author: www.phpwebhost.co.za
 Author URI: http://www.phpwebhost.co.za
 License: GPL2
@@ -47,9 +47,55 @@ register_shutdown_function('shutdownFunction');
 
 
 
+global $pwh_ccfl_plugin_version;
+$pwh_ccfl_plugin_version = "2.2.0";
 
 global $pwh_ccfl_db_version;
-$pwh_ccfl_db_version = "2.0.0";
+$pwh_ccfl_db_version = "2.0.1";
+
+
+function good_ip_cache_install() 
+{
+     global $wpdb;
+     global $pwh_ccfl_db_version;
+
+     $table_name = $wpdb->prefix . "pwh_ccfl_good_ip_cache";
+      
+   $sql = "CREATE TABLE $table_name (
+  id mediumint(9) NOT NULL AUTO_INCREMENT,
+  ip tinytext NOT NULL,
+  expire_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+  UNIQUE KEY id (id)
+    );";
+
+   require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+   dbDelta( $sql );
+ 
+   add_option( "pwh_ccfl_db_version", $pwh_ccfl_db_version );
+}
+
+
+function local_country_code_install() 
+{
+     global $wpdb;
+     global $pwh_ccfl_db_version;
+
+     $table_name = $wpdb->prefix . "pwh_ccfl_country_code";
+      
+   $sql = "CREATE TABLE $table_name (
+  id mediumint(9) NOT NULL AUTO_INCREMENT,
+  ip tinytext NOT NULL,
+  country_code tinytext,
+  expire_time datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+  UNIQUE KEY id (id)
+    );";
+
+   require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+   dbDelta( $sql );
+ 
+   add_option( "pwh_ccfl_db_version", $pwh_ccfl_db_version );
+}
+
 
 function db_install() 
 {
@@ -250,8 +296,8 @@ function create_admin_page(){
           $BlockMonth = 0;
      }
 
-     __("IPs blocked by your site (give yourself a pat on the back!!)", "country_code_failed_login")." <b>".__("Total", "country_code_failed_login").": ".$BlockTotal."</b><br>";
-     __("IPs blocked by your site this month", "country_code_failed_login").": <b>".$BlockMonth."</b><p>";
+     print __("IPs blocked by your site (give yourself a pat on the back!!)", "country_code_failed_login")." <b>".__("Total", "country_code_failed_login").": ".$BlockTotal."</b><br>";
+     print __("IPs blocked by your site this month", "country_code_failed_login").": <b>".$BlockMonth."</b><p>";
 
 
      $options2 = array(
@@ -514,7 +560,14 @@ function create_admin_page(){
           'trace' => 1);
           
           $client = new SoapClient(NULL, $options);
-          $CountryCode = strtolower($client->GetCountryCode($_SERVER["REMOTE_ADDR"]));
+
+	$CountryCode = country_code_failed_login_local_country_code($_SERVER["REMOTE_ADDR"]);
+
+	if($CountryCode == "")
+	{
+          	$CountryCode = strtolower($client->GetCountryCode($_SERVER["REMOTE_ADDR"]));
+		country_code_failed_login_add_local_country_code($_SERVER["REMOTE_ADDR"], $CountryCode);
+	}
 
           $SiteOwnerCountry = strtolower(get_option('pwh_country_code_failed_login_country_code'));
           
@@ -523,15 +576,8 @@ function create_admin_page(){
                return;
           }
 
-
-
-
-
-
-
           if($CountryCode != $SiteOwnerCountry)
           {
-
 
 
                if($DebugSetting == "on")
@@ -556,7 +602,7 @@ function create_admin_page(){
                $client2 = new SoapClient(NULL, $options2);
                $client2->LogBruteForce($_SERVER["REMOTE_ADDR"], $_SERVER["SERVER_NAME"], $CountryCode, $SiteOwnerCountry, $UserName);
 
-
+		country_code_failed_login_delete_ip_health_cache($_SERVER["REMOTE_ADDR"]);
 
                $BlockTotal = get_option('pwh_country_code_failed_login_country_code_block_total', 0);
                if(! is_numeric($BlockTotal) )
@@ -582,6 +628,34 @@ function create_admin_page(){
                header("HTTP/1.0 404 Not Found");
                exit();
           }
+
+     }
+
+
+     function country_code_failed_login_delete_ip_health_cache($IP)
+     {
+          $DebugSetting = get_option('pwh_country_code_failed_login_debug_mode');
+          global $wpdb;
+
+          if($DebugSetting == "on")
+          {
+               WriteLog("country_code_failed_login_delete_expired_local_ban", "DELETE FROM ".$wpdb->prefix."pwh_ccfl_good_ip_cache WHERE expire_time < '" .date("Y-m-d H:i:s")."'");
+          }
+
+          $wpdb->query("DELETE FROM ".$wpdb->prefix."pwh_ccfl_good_ip_cache WHERE ip = '" .$IP."'");
+
+     }
+     function country_code_failed_login_delete_expired_ip_health_cache()
+     {
+          $DebugSetting = get_option('pwh_country_code_failed_login_debug_mode');
+          global $wpdb;
+
+          if($DebugSetting == "on")
+          {
+               WriteLog("country_code_failed_login_delete_expired_local_ban", "DELETE FROM ".$wpdb->prefix."pwh_ccfl_good_ip_cache WHERE expire_time < '" .date("Y-m-d H:i:s")."'");
+          }
+
+          $wpdb->query("DELETE FROM ".$wpdb->prefix."pwh_ccfl_good_ip_cache WHERE expire_time < '" .date("Y-m-d H:i:s")."'");
 
      }
 
@@ -611,6 +685,115 @@ function create_admin_page(){
           $rows_affected = $wpdb->insert( $wpdb->prefix."pwh_ccfl_bad_ip", array( 'id' => 0, 'attacker_ip' => $IP, 'country_code' => $CountryCode, 'expire_time' => date_format($date, 'Y-m-d H:i:s') ) );
 
      }
+
+
+     function add_ip_to_good_health_cache($IP)
+     {
+          $DebugSetting = get_option('pwh_country_code_failed_login_debug_mode');
+          global $wpdb;
+
+          $date = date_create(date("Y-m-d H:i:s"));
+          date_add($date, date_interval_create_from_date_string('600 seconds'));
+     
+          $rows_affected = $wpdb->replace( $wpdb->prefix."pwh_ccfl_good_ip_cache", array( 'id' => 0, 'ip' => $IP, 'expire_time' => date_format($date, 'Y-m-d H:i:s') ) );
+
+     }
+
+
+
+     function country_code_failed_login_add_local_country_code($IP, $CountryCode)
+     {
+          $DebugSetting = get_option('pwh_country_code_failed_login_debug_mode');
+          global $wpdb;
+
+          $date = date_create(date("Y-m-d H:i:s"));
+          date_add($date, date_interval_create_from_date_string('365 days'));
+     
+          if($DebugSetting == "on")
+          {	
+       		WriteLog("country_code_failed_login_check_for_ban", "Adding ".$IP." as ".$CountryCode." locally");
+          }
+          
+		$rows_affected = $wpdb->replace($wpdb->prefix."pwh_ccfl_country_code", array( 'id' => 0, 'ip' => $IP, 'country_code' => $CountryCode, 'expire_time' => date_format($date, 'Y-m-d H:i:s') ) );
+
+     }
+
+     function country_code_failed_login_local_country_code($IP)
+     {
+
+          global $wpdb;
+          $table_name = $wpdb->prefix."pwh_ccfl_country_code";
+          if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) 
+          {
+               local_country_code_install();
+          }
+
+          $DebugSetting = get_option('pwh_country_code_failed_login_debug_mode');
+
+          $post = $wpdb->get_row("SELECT * FROM ".$wpdb->prefix."pwh_ccfl_country_code WHERE ip = '".$IP."'", ARRAY_A);
+
+          if($DebugSetting == "on")
+          {
+               WriteLog("country_code_failed_login_local_country_code", "SELECT * FROM ".$wpdb->prefix."pwh_ccfl_country_code WHERE ip = '".$IP."'");
+               WriteLog("country_code_failed_login_local_country_code", "local country code count: ".count($post));
+          }
+
+          if(count($post) > 0)
+          {
+               if($DebugSetting == "on")
+               {
+                    WriteLog("country_code_failed_login_local_country_code", "Country Code: ".$post["country_code"]);
+               }
+
+               return $post["country_code"];
+          }
+
+          if($DebugSetting == "on")
+          {
+               WriteLog("country_code_failed_login_local_country_code", "Country Code not found locally!");
+          }
+          return "";
+     }
+
+
+
+
+     function ip_in_good_health_cache($IP)
+     {
+
+          global $wpdb;
+          $table_name = $wpdb->prefix."pwh_ccfl_good_ip_cache";
+          if($wpdb->get_var("SHOW TABLES LIKE '$table_name'") != $table_name) 
+          {
+               good_ip_cache_install();
+          }
+
+
+          country_code_failed_login_delete_expired_ip_health_cache();
+
+          $DebugSetting = get_option('pwh_country_code_failed_login_debug_mode');
+
+          
+          $post = $wpdb->get_row("SELECT * FROM ".$wpdb->prefix."pwh_ccfl_good_ip_cache WHERE ip = '".$IP."'", ARRAY_A);
+
+          if($DebugSetting == "on")
+          {
+               WriteLog("country_code_failed_login_local_ban_exists", "SELECT * FROM ".$wpdb->prefix."pwh_ccfl_good_ip_cache WHERE ip = '".$IP."'");
+               WriteLog("country_code_failed_login_local_ban_exists", "IP good health cache: ".count($post));
+          }
+
+          if(count($post) > 0)
+          {
+               return true;
+          }
+
+          return false;
+     }
+
+
+
+
+
 
      function country_code_failed_login_local_ban_exists($AttackerID)
      {
@@ -651,6 +834,9 @@ function create_admin_page(){
 
      function country_code_failed_login_check_for_ban()
      {
+
+	global $pwh_ccfl_plugin_version;
+
           // if the user is not on the wp-login.php form, then don't 
           // do the remote checks
           if( ! strstr($_SERVER["REQUEST_URI"], "wp-login.php"))
@@ -658,8 +844,19 @@ function create_admin_page(){
                return;
           }
 
+	
           $DebugSetting = get_option('pwh_country_code_failed_login_debug_mode');
-          
+          	
+		if(ip_in_good_health_cache($_SERVER["REMOTE_ADDR"]) == true)
+		{
+			// the session cache tells us its good!
+               		if($DebugSetting == "on")
+               		{
+                    		WriteLog("country_code_failed_login_check_for_ban", "IP health good, leaving!");
+               		}
+			return;
+		}
+
                 if(isset($_REQUEST["ccfl"]))
                 {
                         if($_REQUEST["ccfl"] == "off")
@@ -711,13 +908,28 @@ function create_admin_page(){
                WriteLog("country_code_failed_login_check_for_ban", "Local ban does not exist");
           }
 
-          $options = array(
-          'uri' => 'http://api.phpwebhost.co.za',
-          'location' => 'http://api.phpwebhost.co.za/Country.php',
-          'trace' => 1);
+		$AttackerCountryCode = country_code_failed_login_local_country_code($_SERVER["REMOTE_ADDR"]);
+
+		if($AttackerCountryCode == "")
+		{
+
+          		if($DebugSetting == "on")
+          		{	
+        		       WriteLog("country_code_failed_login_check_for_ban", "Country code not found locally, checking from remote server");
           
-          $client = new SoapClient(NULL, $options);
-          $AttackerCountryCode = strtolower($client->GetCountryCode($_SERVER["REMOTE_ADDR"]));
+          		}
+
+          		$options = array(
+          		'uri' => 'http://api.phpwebhost.co.za',
+          		'location' => 'http://api.phpwebhost.co.za/Country.php',
+          		'trace' => 1);
+          
+          		$client = new SoapClient(NULL, $options);
+          		$AttackerCountryCode = strtolower($client->GetCountryCode($_SERVER["REMOTE_ADDR"]));
+
+			country_code_failed_login_add_local_country_code($_SERVER["REMOTE_ADDR"], $AttackerCountryCode);
+
+		}
 
           $SiteOwnerCountry = strtolower(get_option('pwh_country_code_failed_login_country_code'));
 
@@ -745,7 +957,7 @@ function create_admin_page(){
                'trace' => 1);
 
                $client2 = new SoapClient(NULL, $options2);
-               if($client2->CheckForBan($_SERVER["REMOTE_ADDR"]) == true)
+               if($client2->CheckForBan($_SERVER["REMOTE_ADDR"], $pwh_ccfl_plugin_version) == true)
                {
 
                     if($DebugSetting == "on")
@@ -788,6 +1000,8 @@ function create_admin_page(){
                }
                else
                {
+			add_ip_to_good_health_cache($_SERVER["REMOTE_ADDR"]);
+
                     if($DebugSetting == "on")
                     {
                          WriteLog("country_code_failed_login_check_for_ban", "CHECKING BAN, Not banned!!!");
@@ -797,6 +1011,8 @@ function create_admin_page(){
           }
           else
           {
+		add_ip_to_good_health_cache($_SERVER["REMOTE_ADDR"]);
+
                if($DebugSetting == "on")
                {
                     WriteLog("country_code_failed_login_check_for_ban", "SiteOwnerCountry == AttackerCountryCode, exiting!!!");
